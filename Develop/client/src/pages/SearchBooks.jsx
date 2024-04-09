@@ -40,12 +40,13 @@ const SearchBooks = () => {
     }
   };
 
-  const tokenData = Auth.getProfile();
-  const userId = tokenData.data._id;
   const [saveBook] = useMutation(SAVE_BOOK);
+
 
   const handleSaveBook = async (bookId) => {
     const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
+    const tokenData = Auth.getProfile();
+    const userId = tokenData.data._id;
     // const token = Auth.loggedIn() ? Auth.getToken() : null;
     // if (!token) {
     //   return false;

@@ -36,6 +36,7 @@ const SignupForm = () => {
       const { token, user } = data.createUser;
       sessionStorage.setItem('token', token);
       sessionStorage.setItem('user', JSON.stringify(user));
+      console.log(token);
       Auth.login(token);
     } catch (err) {
       setShowAlert(true);

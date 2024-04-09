@@ -10,7 +10,7 @@ const { AuthenticationError } = require('../utils/auth');
 
 const resolvers = {
     Query: {
-        me: async (_, { _id }, context) => { // Change 'userId' to '_id'
+        me: async (_, { _id }, context) => { 
             return getSingleUser(_id);
         },
     },
