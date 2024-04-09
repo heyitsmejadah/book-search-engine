@@ -1,13 +1,3 @@
-const withAuth = (req, res, next) => {
-  if (!req.session.logged_in) {
-    res.redirect('/login');
-  } else {
-    next();
-  }
-};
-
-module.exports = withAuth;
-
 const jwt = require('jsonwebtoken');
 
 const secret = 'mysecretsshhhhh';
@@ -22,19 +12,19 @@ module.exports = {
     }
 
     if (!token) {
-      return res.status(400).json({ message: 'You have no token!' });
+      return res.status(401).json({ message: 'You are not authenticated!' });
     }
 
     try {
-      const { data } = jwt.verify(token, secret, { maxAge: expiration });
+      const { data } = jwt.verify(token, secret);
       req.user = data;
-    } catch {
-      console.log('Invalid token');
-      return res.status(400).json({ message: 'Invalid token!' });
+      next();
+    } catch (error) {
+      console.error('Invalid token:', error);
+      return res.status(401).json({ message: 'Invalid token!' });
     }
-
-    next();
   },
+
   signToken: function ({ username, email, _id }) {
     const payload = { username, email, _id };
     return jwt.sign({ data: payload }, secret, { expiresIn: expiration });
