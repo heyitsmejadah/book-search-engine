@@ -15,7 +15,7 @@ const SavedBooks = () => {
   useEffect(() => {
     const getUserData = async () => {
       try {
-        const token = Auth.loggedIn() ? Auth.getToken() : null;
+        // const token = Auth.loggedIn() ? Auth.getToken() : null;
 
         if (!data) {
           throw new Error("Something went wrong!");

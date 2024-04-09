@@ -46,10 +46,10 @@ const SearchBooks = () => {
 
   const handleSaveBook = async (bookId) => {
     const bookToSave = searchedBooks.find((book) => book.bookId === bookId);
-    const token = Auth.loggedIn() ? Auth.getToken() : null;
-    if (!token) {
-      return false;
-    }
+    // const token = Auth.loggedIn() ? Auth.getToken() : null;
+    // if (!token) {
+    //   return false;
+    // }
     try {
       const { data } = await saveBook({
         variables: {
