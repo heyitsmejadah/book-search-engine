@@ -10,34 +10,22 @@ const {
   
   const resolvers = {
     Query: {
-      me: async (_, __, context) => {
-        // Check if the user is authenticated
-        if (!context.user) {
-          throw new AuthenticationError();
-        }
-        // Call the getSingleUser function from your controller
-        return getSingleUser({ user: context.user }, null);
+      me: async (_, { userId }, context) => {
+        return getSingleUser(userId);
       },
     },
     Mutation: {
       createUser: async (_, args) => {
         return createNewUser(args);
       },
-      saveBook: async (_, { input }, context) => {
-        // Check if the user is authenticated
-        if (!context.user) {
-          throw new AuthenticationError();
-        }
-        // Call the saveBook function from your controller
-        return saveBook({ user: context.user, body: input });
+      saveBook: async (_, { user, book }, context) => {
+        return saveBook({ user, book });
       },
       deleteBook: async (_, { bookId }, context) => {
-        // Check if the user is authenticated
         if (!context.user) {
           throw new AuthenticationError();
         }
-        // Call the deleteBook function from your controller
-        return deleteBook({ user: context.user, params: { bookId } });
+        return deleteBook({ user: context.user, bookId });
       },
       login: async (_, args) => {
         return login(args);
@@ -46,4 +34,5 @@ const {
   };
   
   module.exports = resolvers;
+  
   

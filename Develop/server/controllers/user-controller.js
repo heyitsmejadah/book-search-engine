@@ -2,38 +2,41 @@ const { User } = require('../models');
 const { signToken } = require('../utils/auth');
 
 module.exports = {
-  // Retrieve a single user by their id or username
-  async getSingleUser({ user = null, params }, res) {
+
+  async getSingleUser(req, res) {
     try {
-      const foundUser = await User.findOne({
-        $or: [{ _id: user ? user._id : params.id }, { username: params.username }],
-      });
+      const foundUser = await User.findById(req);
 
       if (!foundUser) {
-        return res.status(404).json({ message: 'User not found' });
+        throw new Error('User not found');
       }
 
-      return res.json(foundUser);
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Internal server error' });
+      console.log(foundUser);
+      return foundUser;
+    } catch (err) {
+      console.error(err);
+      throw new Error('Error fetching user');
     }
   },
 
-  // Create a new user, sign a token, and send it back
   async createNewUser(req, res) {
     try {
-      const user = await User.create(req.body);
-
-      const token = signToken(user);
-      return res.json({ token, user });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Internal server error' });
+      console.log(`body: ${req.username}, ${req.email}, ${req.password}`);
+      const user = await User.create(req);
+      
+      if (!user) {
+        throw new Error('User not created!');
+      }
+      
+      const token = signToken({ email: user.email, name: user.username, _id: user._id });
+      
+      return { token, user };
+    } catch (err) {
+      console.error(err);
+      throw new Error('Error creating user');
     }
   },
-
-  // Login a user, sign a token, and send it back
+ 
   async login({ body }, res) {
     try {
       const user = await User.findOne({ $or: [{ username: body.username }, { email: body.email }] });
@@ -43,34 +46,33 @@ module.exports = {
       }
 
       const correctPw = await user.isCorrectPassword(body.password);
+
       if (!correctPw) {
         return res.status(400).json({ message: 'Wrong password!' });
       }
 
       const token = signToken(user);
-      return res.json({ token, user });
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Internal server error' });
+      res.json({ token, user });
+    } catch (err) {
+      console.error(err);
+      throw new Error('Error logging in');
     }
   },
 
-  // Save a book to a user's savedBooks field
-  async saveBook({ user, body }, res) {
+  async saveBook({ user, book }, res) {
     try {
+      console.log(user);
       const updatedUser = await User.findOneAndUpdate(
-        { _id: user._id },
-        { $addToSet: { savedBooks: body } },
+        { _id: user },
+        { $addToSet: { savedBooks: book } },
         { new: true, runValidators: true }
       );
-      return res.json(updatedUser);
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Internal server error' });
+      return updatedUser;
+    } catch (err) {
+      console.error(err);
+      throw new Error('Could not save book!');
     }
   },
-
-  // Remove a book from savedBooks
   async deleteBook({ user, params }, res) {
     try {
       const updatedUser = await User.findOneAndUpdate(
@@ -78,16 +80,15 @@ module.exports = {
         { $pull: { savedBooks: { bookId: params.bookId } } },
         { new: true }
       );
-      
+
       if (!updatedUser) {
         return res.status(404).json({ message: "Couldn't find user with this id!" });
       }
-      
-      return res.json(updatedUser);
-    } catch (error) {
-      console.error(error);
-      return res.status(500).json({ message: 'Internal server error' });
+
+      return updatedUser;
+    } catch (err) {
+      console.error(err);
+      throw new Error('Error deleting book');
     }
   },
 };
-
